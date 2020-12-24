@@ -1,7 +1,9 @@
 {-# OPTIONS_GHC -cpp -pgmPcpphs -optP--cpp #-}
 {-# LANGUAGE CPP #-}
 module Stripe.Client
-  ( ApiKey, StripeClient, makeStripeClient
+  ( -- * Basics
+    ApiKey, StripeClient, makeStripeClient
+    -- * Customers
   , createCustomer, retrieveCustomer, updateCustomer
   , Customer(..), CustomerCreate(..), CustomerUpdate(..)
   )
@@ -17,14 +19,17 @@ import Network.HTTP.Client (Manager)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 
+-- | Your Stripe API key. Can be obtained from the Stripe dashboard. Format: @sk_<mode>_<redacted>@
 type ApiKey = T.Text
 
+-- | Holds a 'Manager' and your API key.
 data StripeClient
   = StripeClient
   { scBasicAuthData :: BasicAuthData
   , scManager :: Manager
   }
 
+-- | Construct a 'StripeClient'. Note that the passed 'Manager' must support https (e.g. via @http-client-tls@)
 makeStripeClient :: ApiKey -> Manager -> StripeClient
 makeStripeClient k = StripeClient (BasicAuthData (T.encodeUtf8 k) "")
 
