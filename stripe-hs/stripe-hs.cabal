@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2c378b1251ce4b864e6c586280af0f288b78e7bfe2a8b7bb7e2fc15e128329a6
+-- hash: e3b93721f97a9a10c4c1eac1e38649e238caceee6ce78dce82361e9f569a82e8
 
 name:           stripe-hs
 version:        0.1.0.0
@@ -28,7 +28,6 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
       Stripe.Client
       Stripe.Webhook.Verify
   other-modules:
