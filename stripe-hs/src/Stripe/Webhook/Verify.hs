@@ -4,16 +4,15 @@ module Stripe.Webhook.Verify
   )
 where
 
+import Crypto.Hash.Algorithms
+import Crypto.MAC.HMAC
+import Data.Bifunctor
+import Data.ByteArray.Encoding
 import Data.Time
 import Data.Time.Clock.POSIX
-import Data.Bifunctor
 import Safe
-import Crypto.MAC.HMAC
-import Crypto.Hash.Algorithms
-import Data.ByteArray.Encoding
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
-import Debug.Trace
 
 type WebhookSecret = BS.ByteString
 
@@ -40,4 +39,4 @@ verifyStripeSignature secret sig rawBody =
              hexSig = convertToBase Base16 computedSig
          in if hexSig == v1
                then VOk time
-               else trace (show (payload, rawTime, time, v1, hexSig)) $ VFailed
+               else VFailed
