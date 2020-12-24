@@ -13,6 +13,8 @@ module Stripe.Client
   , ProductCreate(..), PriceCreate(..), PriceCreateRecurring(..)
   , createProduct, retrieveProduct
   , createPrice, retrievePrice, listPrices
+    -- * Subscriptions
+  , SubscriptionId(..)
     -- * Checkout
   , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
   , createCheckoutSession, retrieveCheckoutSession

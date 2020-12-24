@@ -9,6 +9,8 @@ module Stripe.Resources
   , ProductId(..), PriceId(..)
   , Product(..), ProductCreate(..)
   , Price(..), PriceRecurring(..), PriceCreate(..), PriceCreateRecurring(..)
+    -- * Subscriptions
+  , SubscriptionId(..)
     -- * Checkout
   , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
     -- * Events
@@ -156,6 +158,10 @@ data ProductCreate
   , prcDescription :: Maybe T.Text
   } deriving (Show, Eq, Generic)
 
+newtype SubscriptionId
+  = SubscriptionId { unSubscriptionId :: T.Text }
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
 newtype CheckoutSessionId
   = CheckoutSessionId { unCheckoutSessionId :: T.Text }
   deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
@@ -167,6 +173,7 @@ data CheckoutSession
   , csCancelUrl :: T.Text
   , csSuccessUrl :: T.Text
   , csPaymentMethodTypes :: V.Vector T.Text  -- TODO: make enum
+  , csSubscription :: Maybe SubscriptionId
   } deriving (Show, Eq)
 
 data CheckoutSessionCreate
@@ -223,17 +230,22 @@ instance ToForm PriceCreate where
 
 instance ToForm CheckoutSessionCreate where
   toForm csc =
-    let convertItem itm =
-          [ ("line_items[0][price]", [toUrlPiece $ cscliPrice itm])
-          , ("line_items[0][quantity]", [toUrlPiece $ cscliQuantity itm])
+    let convertItem (idx, itm) =
+          [ ("line_items[" <> toUrlPiece idx <> "][price]", [toUrlPiece $ cscliPrice itm])
+          , ("line_items[" <> toUrlPiece idx <> "][quantity]", [toUrlPiece $ cscliQuantity itm])
           ]
         lineItems =
-          concatMap convertItem (cscLineItems csc)
+          concatMap convertItem (zip ([0..] :: [Int]) (cscLineItems csc))
+        convertPmt (idx, pm) =
+          ( "payment_method_types[" <> toUrlPiece idx <> "]"
+          , [pm]
+          )
+        pmt =
+          map convertPmt (zip ([0..] :: [Int]) (cscPaymentMethodTypes csc))
     in Form $ HM.fromList $
        [ ("cancel_url", [cscCancelUrl csc])
        , ("success_url", [cscSuccessUrl csc])
-       , ("payment_method_types", cscPaymentMethodTypes csc)
        , ("mode", [cscMode csc])
        , ("client_reference_id", maybeToList $ cscClientReferenceId csc)
        , ("customer", maybeToList $ fmap toUrlPiece $ cscCustomer csc)
-       ] <> lineItems
+       ] <> lineItems <> pmt

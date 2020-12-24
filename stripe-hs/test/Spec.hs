@@ -104,6 +104,39 @@ apiTests =
                pId (V.head (slData res)) `shouldBe` pId price
                res2 <- forceSuccess $ listPrices cli (Just "KEY_NOT_EXISTING_OK")
                V.null (slData res2) `shouldBe` True
+     describe "checkout" $
+       do it "create and retrieves a checkout session" $ \cli ->
+            do prod <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)
+               price <-
+                 forceSuccess $
+                 createPrice cli $
+                 PriceCreate "usd" (Just 1000) (prId prod) Nothing False $
+                 Just (PriceCreateRecurring "month" Nothing)
+               customer <-
+                 forceSuccess $
+                 createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
+               session <-
+                 forceSuccess $
+                 createCheckoutSession cli $
+                 CheckoutSessionCreate
+                 { cscCancelUrl = "https://athiemann.net/cancel"
+                 , cscMode = "subscription"
+                 , cscPaymentMethodTypes = ["card"]
+                 , cscSuccessUrl = "https://athiemann.net/success"
+                 , cscClientReferenceId = Just "cool"
+                 , cscCustomer = Just (cId customer)
+                 , cscLineItems = [CheckoutSessionCreateLineItem (pId price) 1]
+                 }
+               csClientReferenceId session `shouldBe` Just "cool"
+               csCancelUrl session `shouldBe` "https://athiemann.net/cancel"
+               csSuccessUrl session `shouldBe` "https://athiemann.net/success"
+               csPaymentMethodTypes session `shouldBe` V.singleton "card"
+
+               sessionRetrieved <-
+                 forceSuccess $
+                 retrieveCheckoutSession cli (csId session)
+               sessionRetrieved `shouldBe` session
+
      describe "customers" $
        do it "creates a customer" $ \cli ->
             do cr <- forceSuccess $ createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
