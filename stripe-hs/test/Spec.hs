@@ -5,6 +5,7 @@ import Data.Time.Clock.POSIX
 import System.Environment (getEnv)
 import qualified Data.Text as T
 import qualified Data.ByteString as BS
+import qualified Data.Vector as V
 
 import Stripe.Client
 import Stripe.Webhook.Verify
@@ -57,7 +58,12 @@ webhookTests =
 apiTests :: SpecWith ()
 apiTests =
   before makeClient $
-  do describe "customers" $
+  do describe "events" $
+       do it "lists events" $ \cli ->
+            do _ <- forceSuccess $ createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
+               res <- forceSuccess $ listEvents cli Nothing
+               V.null (slData res) `shouldBe` False
+     describe "customers" $
        do it "creates a customer" $ \cli ->
             do cr <- forceSuccess $ createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
                cEmail cr `shouldBe` Just "mail@athiemann.net"

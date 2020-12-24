@@ -3,9 +3,14 @@
 module Stripe.Client
   ( -- * Basics
     ApiKey, StripeClient, makeStripeClient
+    -- * Helper types
+  , TimeStamp(..), StripeList(..)
     -- * Customers
-  , createCustomer, retrieveCustomer, updateCustomer
+  , createCustomer, retrieveCustomer, updateCustomer, listCustomers
   , Customer(..), CustomerCreate(..), CustomerUpdate(..)
+    -- * Events
+  , retrieveEvent, listEvents
+  , Event(..), EventData(..)
   )
 where
 
@@ -57,6 +62,11 @@ stripeBaseUrl = BaseUrl Https "api.stripe.com" 443 ""
 EP(createCustomer, CustomerCreate, Customer)
 EP(retrieveCustomer, CustomerId, Customer)
 EP2(updateCustomer, CustomerId, CustomerUpdate, Customer)
+EP(listCustomers, Maybe CustomerId, (StripeList Customer))
 
-createCustomer' :<|> retrieveCustomer' :<|> updateCustomer'
+EP(retrieveEvent, EventId, Event)
+EP(listEvents, Maybe EventId, (StripeList Event))
+
+(createCustomer' :<|> retrieveCustomer' :<|> updateCustomer' :<|> listCustomers')
+  :<|> (retrieveEvent' :<|> listEvents')
   = client api

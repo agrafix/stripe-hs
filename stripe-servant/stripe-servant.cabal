@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2d3569b146e9ff1c7dcc52002cc366e12b3ddb29784bc60e2cffdfadd19cf98c
+-- hash: 123c1b46fe4feb6812d95d88060965e589a96bbd69636743e8e977ddf7a1c73b
 
 name:           stripe-servant
 version:        0.1.0.0
@@ -44,4 +44,6 @@ library
     , http-api-data
     , servant
     , text
+    , time
+    , vector
   default-language: Haskell2010

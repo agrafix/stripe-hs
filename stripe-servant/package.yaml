@@ -21,6 +21,8 @@ dependencies:
   - text
   - servant
   - http-api-data
+  - time
+  - vector
 
 default-extensions:
   - OverloadedStrings

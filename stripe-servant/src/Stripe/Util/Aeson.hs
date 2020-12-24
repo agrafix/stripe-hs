@@ -10,4 +10,7 @@ import Text.Casing (quietSnake)
 
 jsonOpts :: Int -> Options
 jsonOpts x =
-  defaultOptions{fieldLabelModifier = quietSnake . drop x, constructorTagModifier = quietSnake}
+  defaultOptions
+  { fieldLabelModifier = quietSnake . drop x
+  , constructorTagModifier = quietSnake
+  }
