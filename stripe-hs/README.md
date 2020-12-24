@@ -37,4 +37,5 @@ main =
 The package provides a module for webhook signature verification (see `Stripe.Webhook.Verify`).
 
 Supported APIs/Resources:
-* Customers *(missing many fields)*
+* Customers *(missing fields)*
+* Events *(missing fields)*
