@@ -1,0 +1,48 @@
+{
+  "id": "evt_1I1lRDCAi9F65qzmBGkbFoBI",
+  "object": "event",
+  "api_version": "2020-08-27",
+  "created": 1608784111,
+  "data": {
+    "object": {
+      "id": "cus_Id1Ulz09V5J58Y",
+      "object": "customer",
+      "address": null,
+      "balance": 0,
+      "created": 1608784111,
+      "currency": null,
+      "default_source": null,
+      "delinquent": false,
+      "description": null,
+      "discount": null,
+      "email": "mail+2@athiemann.net",
+      "invoice_prefix": "0347A879",
+      "invoice_settings": {
+        "custom_fields": null,
+        "default_payment_method": null,
+        "footer": null
+      },
+      "livemode": false,
+      "metadata": {
+      },
+      "name": null,
+      "next_invoice_sequence": 1,
+      "phone": null,
+      "preferred_locales": [
+
+      ],
+      "shipping": null,
+      "tax_exempt": "none"
+    },
+    "previous_attributes": {
+      "email": "mail@athiemann.net"
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": "req_Gk9uCas2pS3Xlr",
+    "idempotency_key": null
+  },
+  "type": "customer.updated"
+}

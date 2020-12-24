@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 39aa478c7159130e58d669fe464c106d85f790cb6834a8c6a6277464ed325a31
+-- hash: f299df19fc4311e68b87512b624a507b5a0acb49115fe40984a88b33cf3e87d4
 
 name:           stripe-hs
 version:        0.1.0.0
@@ -30,6 +30,7 @@ library
   exposed-modules:
       Lib
       Stripe.Client
+      Stripe.Webhook.Verify
   other-modules:
       Paths_stripe_hs
   hs-source-dirs:
@@ -38,14 +39,18 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bytestring
     , casing
     , cpphs
+    , cryptonite
     , http-client
-    , http-client-tls
+    , memory
+    , safe
     , servant
     , servant-client
     , stripe-servant
     , text
+    , time
   default-language: Haskell2010
 
 test-suite stripe-hs-test
@@ -60,14 +65,19 @@ test-suite stripe-hs-test
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bytestring
     , casing
     , cpphs
+    , cryptonite
     , hspec
     , http-client
     , http-client-tls
+    , memory
+    , safe
     , servant
     , servant-client
     , stripe-hs
     , stripe-servant
     , text
+    , time
   default-language: Haskell2010
