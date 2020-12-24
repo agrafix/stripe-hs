@@ -1,0 +1,40 @@
+name:                stripe-servant
+version:             0.1.0.0
+github:              "agrafix/stripe-hs"
+license:             BSD3
+author:              "Alexander Thiemann <mail@thiemann.at>"
+maintainer:          "Alexander Thiemann <mail@thiemann.at>"
+copyright:           "2020 Alexander Thiemann <mail@thiemann.at>"
+
+extra-source-files:
+  - README.md
+
+synopsis:            Unofficial Stripe servant types
+category:            Web
+
+description:         Unofficial description of the Stripe API using servant types
+
+dependencies:
+  - base >= 4.7 && < 5
+  - aeson
+  - casing
+  - text
+  - servant
+  - http-api-data
+
+default-extensions:
+  - OverloadedStrings
+  - DataKinds
+  - TypeOperators
+  - TypeFamilies
+  - GADTs
+  - FlexibleInstances
+  - FlexibleContexts
+  - MultiParamTypeClasses
+  - StrictData
+  - ScopedTypeVariables
+  - DeriveGeneric
+  - DeriveFunctor
+
+library:
+  source-dirs: src
