@@ -11,6 +11,8 @@ module Stripe.Resources
   , Price(..), PriceRecurring(..), PriceCreate(..), PriceCreateRecurring(..)
     -- * Subscriptions
   , SubscriptionId(..)
+    -- * Customer Portal
+  , CustomerPortalId(..), CustomerPortal(..), CustomerPortalCreate(..)
     -- * Checkout
   , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
     -- * Events
@@ -169,6 +171,7 @@ newtype CheckoutSessionId
 data CheckoutSession
   = CheckoutSession
   { csId :: CheckoutSessionId
+  , csLivemode :: Bool
   , csClientReferenceId :: Maybe T.Text
   , csCancelUrl :: T.Text
   , csSuccessUrl :: T.Text
@@ -193,6 +196,26 @@ data CheckoutSessionCreateLineItem
   , cscliQuantity :: Integer
   } deriving (Show, Eq, Generic)
 
+newtype CustomerPortalId
+  = CustomerPortalId { unCustomerPortalId :: T.Text }
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
+data CustomerPortal
+  = CustomerPortal
+  { cpId :: CustomerPortalId
+  , cpLivemode :: Bool
+  , cpCreated :: TimeStamp
+  , cpCustomer :: CustomerId
+  , cpReturnUrl :: Maybe T.Text
+  , cpUrl :: T.Text
+  } deriving (Show, Eq)
+
+data CustomerPortalCreate
+  = CustomerPortalCreate
+  { cpcCustomer :: CustomerId
+  , cpcReturnUrl :: Maybe T.Text
+  } deriving (Show, Eq, Generic)
+
 $(deriveJSON (jsonOpts 2) ''StripeList)
 $(deriveJSON (jsonOpts 1) ''Customer)
 $(deriveJSON (jsonOpts 1) ''Event)
@@ -201,12 +224,16 @@ $(deriveJSON (jsonOpts 2) ''CheckoutSession)
 $(deriveJSON (jsonOpts 1) ''Price)
 $(deriveJSON (jsonOpts 2) ''PriceRecurring)
 $(deriveJSON (jsonOpts 2) ''Product)
+$(deriveJSON (jsonOpts 2) ''CustomerPortal)
 
 instance ToForm CustomerCreate where
   toForm = genericToForm (formOptions 2)
 
 instance ToForm CustomerUpdate where
   toForm = genericToForm (formOptions 2)
+
+instance ToForm CustomerPortalCreate where
+  toForm = genericToForm (formOptions 3)
 
 instance ToForm ProductCreate where
   toForm = genericToForm (formOptions 3)

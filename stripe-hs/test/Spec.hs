@@ -104,6 +104,16 @@ apiTests =
                pId (V.head (slData res)) `shouldBe` pId price
                res2 <- forceSuccess $ listPrices cli (Just "KEY_NOT_EXISTING_OK")
                V.null (slData res2) `shouldBe` True
+     describe "customer portal" $
+       do it "allows creating a customer portal (needs setup in dashboard)" $ \cli ->
+            do customer <-
+                 forceSuccess $
+                 createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
+               portal <-
+                 forceSuccess $
+                 createCustomerPortal cli (CustomerPortalCreate (cId customer) (Just "https://athiemann.net/return"))
+               cpCustomer portal `shouldBe` cId customer
+               cpReturnUrl portal `shouldBe` Just "https://athiemann.net/return"
      describe "checkout" $
        do it "create and retrieves a checkout session" $ \cli ->
             do prod <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)

@@ -15,6 +15,9 @@ module Stripe.Client
   , createPrice, retrievePrice, listPrices
     -- * Subscriptions
   , SubscriptionId(..)
+    -- * Customer Portal
+  , CustomerPortalId(..), CustomerPortal(..), CustomerPortalCreate(..)
+  , createCustomerPortal
     -- * Checkout
   , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
   , createCheckoutSession, retrieveCheckoutSession
@@ -84,6 +87,8 @@ EP(listPrices, Maybe T.Text, (StripeList Price))
 EP(createCheckoutSession, CheckoutSessionCreate, CheckoutSession)
 EP(retrieveCheckoutSession, CheckoutSessionId, CheckoutSession)
 
+EP(createCustomerPortal, CustomerPortalCreate, CustomerPortal)
+
 EP(retrieveEvent, EventId, Event)
 EP(listEvents, Maybe EventId, (StripeList Event))
 
@@ -91,5 +96,6 @@ EP(listEvents, Maybe EventId, (StripeList Event))
   :<|> (createProduct' :<|> retrieveProduct')
   :<|> (createPrice' :<|> retrievePrice' :<|> listPrices')
   :<|> (createCheckoutSession' :<|> retrieveCheckoutSession')
+  :<|> (createCustomerPortal')
   :<|> (retrieveEvent' :<|> listEvents')
   = client api

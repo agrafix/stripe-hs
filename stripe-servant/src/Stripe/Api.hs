@@ -17,6 +17,7 @@ type StripeApiInternal
   :<|> "products" :> ProductApi
   :<|> "prices" :> PriceApi
   :<|> "checkout" :> "sessions" :> CheckoutApi
+  :<|> "billing_portal" :> "sessions" :> CustomerPortalApi
   :<|> "events" :> EventApi
 
 type CustomerApi
@@ -41,3 +42,6 @@ type PriceApi
 type CheckoutApi
   = StripeAuth :> ReqBody '[FormUrlEncoded] CheckoutSessionCreate :> Post '[JSON] CheckoutSession
   :<|> StripeAuth :> Capture ":session_id" CheckoutSessionId :> Get '[JSON] CheckoutSession
+
+type CustomerPortalApi
+  = StripeAuth :> ReqBody '[FormUrlEncoded] CustomerPortalCreate :> Post '[JSON] CustomerPortal
