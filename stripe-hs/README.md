@@ -37,5 +37,15 @@ main =
 The package provides a module for webhook signature verification (see `Stripe.Webhook.Verify`).
 
 Supported APIs/Resources:
-* Customers *(missing fields)*
-* Events *(missing fields)*
+* Customers
+* Products
+* Prices
+* CustomerPortal
+* CheckoutSession
+* Events
+
+*Note that all resources are likely missing fields. The library is currently focused on to be used in combination with Stripe's hosted surfaces (Customer Portal and Checkout).*
+
+## Running the tests
+
+You can run all tests with `stack test`. You'll need a Stripe testmode API Key assigned to the `STRIPE_KEY` environment variable and you'll need to setup a Customer Portal configuration in the Stripe dashboard before running them.
