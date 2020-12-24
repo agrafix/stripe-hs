@@ -5,6 +5,10 @@ module Stripe.Resources
     TimeStamp(..), StripeList(..)
     -- * Customers
   , CustomerId(..), Customer(..), CustomerCreate(..), CustomerUpdate(..)
+    -- * Product catalog
+  , ProductId(..), PriceId(..), Product(..), Price(..), PriceRecurring(..)
+    -- * Checkout
+  , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
     -- * Events
   , EventId(..), Event(..), EventData(..)
   )
@@ -12,15 +16,17 @@ where
 
 import Stripe.Util.Aeson
 
-import Servant.API
-import Data.Time.Clock.POSIX
-import Web.FormUrlEncoded
-import qualified Data.Text as T
-import GHC.Generics
-import Text.Casing (quietSnake)
-import qualified Data.Aeson as A
-import qualified Data.Vector as V
+import Data.Maybe
 import Data.Time
+import Data.Time.Clock.POSIX
+import GHC.Generics
+import Servant.API
+import Text.Casing (quietSnake)
+import Web.FormUrlEncoded
+import qualified Data.Aeson as A
+import qualified Data.HashMap.Strict as HM
+import qualified Data.Text as T
+import qualified Data.Vector as V
 
 formOptions :: Int -> FormOptions
 formOptions x =
@@ -91,13 +97,99 @@ data EventData
   { edObject :: A.Value
   } deriving (Show, Eq)
 
+newtype PriceId
+  = PriceId { unPriceId :: T.Text }
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
+data Price
+  = Price
+  { pId :: PriceId
+  , pActive :: Bool
+  , pCurrency :: T.Text
+  , pNickname :: Maybe T.Text
+  , pType :: T.Text -- TODO: make enum
+  , pRecurring :: PriceRecurring
+  , pUnitAmount :: Maybe Int
+  , pProduct :: ProductId
+  , pLookupKey :: Maybe T.Text
+  } deriving (Show, Eq)
+
+data PriceRecurring
+  = PriceRecurring
+  { prInterval :: T.Text -- TODO: make enum
+  , prIntervalCount :: Maybe Int
+  } deriving (Show, Eq)
+
+newtype ProductId
+  = ProductId { unProductId :: T.Text }
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
+data Product
+  = Product
+  { prId :: ProductId
+  , prActive :: Bool
+  , prName :: T.Text
+  , prDescription :: Maybe T.Text
+  } deriving (Show, Eq)
+
+newtype CheckoutSessionId
+  = CheckoutSessionId { unCheckoutSessionId :: T.Text }
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
+data CheckoutSession
+  = CheckoutSession
+  { csId :: CheckoutSessionId
+  , csClientReferenceId :: Maybe T.Text
+  , csCancelUrl :: T.Text
+  , csSuccessUrl :: T.Text
+  , csPaymentMethodTypes :: V.Vector T.Text  -- TODO: make enum
+  } deriving (Show, Eq)
+
+data CheckoutSessionCreate
+  = CheckoutSessionCreate
+  { cscCancelUrl :: T.Text
+  , cscMode :: T.Text  -- TODO: make enum
+  , cscPaymentMethodTypes :: [T.Text]  -- TODO: make enum
+  , cscSuccessUrl :: T.Text
+  , cscClientReferenceId :: Maybe T.Text
+  , cscCustomer :: Maybe CustomerId
+  , cscLineItems :: [CheckoutSessionCreateLineItem]
+  } deriving (Show, Eq, Generic)
+
+data CheckoutSessionCreateLineItem
+  = CheckoutSessionCreateLineItem
+  { cscliPrice :: PriceId
+  , cscliQuantity :: Integer
+  } deriving (Show, Eq, Generic)
+
 $(deriveJSON (jsonOpts 2) ''StripeList)
 $(deriveJSON (jsonOpts 1) ''Customer)
 $(deriveJSON (jsonOpts 1) ''Event)
 $(deriveJSON (jsonOpts 2) ''EventData)
+$(deriveJSON (jsonOpts 2) ''CheckoutSession)
+$(deriveJSON (jsonOpts 1) ''Price)
+$(deriveJSON (jsonOpts 2) ''PriceRecurring)
+$(deriveJSON (jsonOpts 2) ''Product)
 
 instance ToForm CustomerCreate where
   toForm = genericToForm (formOptions 2)
 
 instance ToForm CustomerUpdate where
   toForm = genericToForm (formOptions 2)
+
+instance ToForm CheckoutSessionCreate where
+  toForm csc =
+    let convertItem itm =
+          [ ("line_items[0][price]", [toUrlPiece $ cscliPrice itm])
+          , ("line_items[0][quantity]", [toUrlPiece $ cscliQuantity itm])
+          ]
+        lineItems =
+          concatMap convertItem (cscLineItems csc)
+    in Form $ HM.fromList $
+       [ ("cancel_url", [cscCancelUrl csc])
+       , ("success_url", [cscSuccessUrl csc])
+       , ("payment_method_types", cscPaymentMethodTypes csc)
+       , ("mode", [cscMode csc])
+       , ("client_reference_id", maybeToList $ cscClientReferenceId csc)
+       , ("customer", maybeToList $ fmap toUrlPiece $ cscCustomer csc)
+       ] <> lineItems

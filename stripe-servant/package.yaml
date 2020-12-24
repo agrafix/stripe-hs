@@ -23,6 +23,7 @@ dependencies:
   - http-api-data
   - time
   - vector
+  - unordered-containers
 
 default-extensions:
   - OverloadedStrings

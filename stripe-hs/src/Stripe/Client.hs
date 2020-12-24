@@ -8,6 +8,12 @@ module Stripe.Client
     -- * Customers
   , createCustomer, retrieveCustomer, updateCustomer, listCustomers
   , Customer(..), CustomerCreate(..), CustomerUpdate(..)
+    -- * Product catalog
+  , ProductId(..), PriceId(..), Product(..), Price(..), PriceRecurring(..)
+  , retrieveProduct, retrievePrice, listPrices
+    -- * Checkout
+  , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
+  , createCheckoutSession, retrieveCheckoutSession
     -- * Events
   , retrieveEvent, listEvents
   , Event(..), EventData(..)
@@ -64,9 +70,20 @@ EP(retrieveCustomer, CustomerId, Customer)
 EP2(updateCustomer, CustomerId, CustomerUpdate, Customer)
 EP(listCustomers, Maybe CustomerId, (StripeList Customer))
 
+EP(retrieveProduct, ProductId, Product)
+
+EP(retrievePrice, PriceId, Price)
+EP(listPrices, Maybe T.Text, (StripeList Price))
+
+EP(createCheckoutSession, CheckoutSessionCreate, CheckoutSession)
+EP(retrieveCheckoutSession, CheckoutSessionId, CheckoutSession)
+
 EP(retrieveEvent, EventId, Event)
 EP(listEvents, Maybe EventId, (StripeList Event))
 
 (createCustomer' :<|> retrieveCustomer' :<|> updateCustomer' :<|> listCustomers')
+  :<|> (retrieveProduct')
+  :<|> (retrievePrice' :<|> listPrices')
+  :<|> (createCheckoutSession' :<|> retrieveCheckoutSession')
   :<|> (retrieveEvent' :<|> listEvents')
   = client api
