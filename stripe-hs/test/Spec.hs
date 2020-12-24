@@ -63,6 +63,47 @@ apiTests =
             do _ <- forceSuccess $ createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
                res <- forceSuccess $ listEvents cli Nothing
                V.null (slData res) `shouldBe` False
+     describe "products" $
+       do it "creates a product" $ \cli ->
+            do res <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)
+               prName res `shouldBe` "Test"
+          it "retrieves a product" $ \cli ->
+            do res <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)
+               res2 <- forceSuccess $ retrieveProduct cli (prId res)
+               res `shouldBe` res2
+     describe "prices" $
+       do it "creates a price" $ \cli ->
+            do prod <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)
+               res <-
+                 forceSuccess $
+                 createPrice cli $
+                 PriceCreate "usd" (Just 1000) (prId prod) (Just "lk") True $
+                 Just (PriceCreateRecurring "month" Nothing)
+               pCurrency res `shouldBe` "usd"
+               pUnitAmount res `shouldBe` Just 1000
+               pType res `shouldBe` "recurring"
+               pLookupKey res `shouldBe` Just "lk"
+               pRecurring res `shouldBe` Just (PriceRecurring "month" 1)
+          it "retrieves a price" $ \cli ->
+            do prod <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)
+               res <-
+                 forceSuccess $
+                 createPrice cli $
+                 PriceCreate "usd" (Just 1000) (prId prod) Nothing False $
+                 Just (PriceCreateRecurring "month" Nothing)
+               res2 <- forceSuccess $ retrievePrice cli (pId res)
+               res `shouldBe` res2
+          it "lists by lookup_key" $ \cli ->
+            do prod <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)
+               price <-
+                 forceSuccess $
+                 createPrice cli $
+                 PriceCreate "usd" (Just 1000) (prId prod) (Just "the_key") True $
+                 Just (PriceCreateRecurring "month" Nothing)
+               res <- forceSuccess $ listPrices cli (Just "the_key")
+               pId (V.head (slData res)) `shouldBe` pId price
+               res2 <- forceSuccess $ listPrices cli (Just "KEY_NOT_EXISTING_OK")
+               V.null (slData res2) `shouldBe` True
      describe "customers" $
        do it "creates a customer" $ \cli ->
             do cr <- forceSuccess $ createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))

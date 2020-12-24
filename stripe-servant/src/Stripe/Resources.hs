@@ -6,7 +6,9 @@ module Stripe.Resources
     -- * Customers
   , CustomerId(..), Customer(..), CustomerCreate(..), CustomerUpdate(..)
     -- * Product catalog
-  , ProductId(..), PriceId(..), Product(..), Price(..), PriceRecurring(..)
+  , ProductId(..), PriceId(..)
+  , Product(..), ProductCreate(..)
+  , Price(..), PriceRecurring(..), PriceCreate(..), PriceCreateRecurring(..)
     -- * Checkout
   , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
     -- * Events
@@ -108,7 +110,7 @@ data Price
   , pCurrency :: T.Text
   , pNickname :: Maybe T.Text
   , pType :: T.Text -- TODO: make enum
-  , pRecurring :: PriceRecurring
+  , pRecurring :: Maybe PriceRecurring
   , pUnitAmount :: Maybe Int
   , pProduct :: ProductId
   , pLookupKey :: Maybe T.Text
@@ -117,7 +119,23 @@ data Price
 data PriceRecurring
   = PriceRecurring
   { prInterval :: T.Text -- TODO: make enum
-  , prIntervalCount :: Maybe Int
+  , prIntervalCount :: Int
+  } deriving (Show, Eq)
+
+data PriceCreate
+  = PriceCreate
+  { pcCurrency :: T.Text
+  , pcUnitAmount :: Maybe Int
+  , pcProduct :: ProductId
+  , pcLookupKey :: Maybe T.Text
+  , pcTransferLookupKey :: Bool
+  , pcRecurring :: Maybe PriceCreateRecurring
+  } deriving (Show, Eq, Generic)
+
+data PriceCreateRecurring
+  = PriceCreateRecurring
+  { prcInterval :: T.Text -- TODO: make enum
+  , prcIntervalCount :: Maybe Int
   } deriving (Show, Eq)
 
 newtype ProductId
@@ -131,6 +149,12 @@ data Product
   , prName :: T.Text
   , prDescription :: Maybe T.Text
   } deriving (Show, Eq)
+
+data ProductCreate
+  = ProductCreate
+  { prcName :: T.Text
+  , prcDescription :: Maybe T.Text
+  } deriving (Show, Eq, Generic)
 
 newtype CheckoutSessionId
   = CheckoutSessionId { unCheckoutSessionId :: T.Text }
@@ -176,6 +200,26 @@ instance ToForm CustomerCreate where
 
 instance ToForm CustomerUpdate where
   toForm = genericToForm (formOptions 2)
+
+instance ToForm ProductCreate where
+  toForm = genericToForm (formOptions 3)
+
+instance ToForm PriceCreate where
+  toForm pc =
+    let recurringPiece =
+          case pcRecurring pc of
+            Nothing -> []
+            Just x ->
+              [ ("recurring[interval]", [prcInterval x])
+              , ("recurring[interval_count]", maybeToList $ fmap toUrlPiece $ prcIntervalCount x)
+              ]
+    in Form $ HM.fromList $
+       [ ("currency", [pcCurrency pc])
+       , ("product", [toUrlPiece $ pcProduct pc])
+       , ("unit_amount", maybeToList $ fmap toUrlPiece $ pcUnitAmount pc)
+       , ("lookup_key", maybeToList $ pcLookupKey pc)
+       , ("transfer_lookup_key", [toUrlPiece $ pcTransferLookupKey pc])
+       ] <> recurringPiece
 
 instance ToForm CheckoutSessionCreate where
   toForm csc =

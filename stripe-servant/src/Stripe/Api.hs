@@ -30,11 +30,13 @@ type EventApi
   :<|> StripeAuth :> QueryParam "starting_after" EventId :> Get '[JSON] (StripeList Event)
 
 type ProductApi
-  = StripeAuth :> Capture ":product_id" ProductId :> Get '[JSON] Product
+  = StripeAuth :> ReqBody '[FormUrlEncoded] ProductCreate :> Post '[JSON] Product
+  :<|> StripeAuth :> Capture ":product_id" ProductId :> Get '[JSON] Product
 
 type PriceApi
-  = StripeAuth :> Capture ":product_id" PriceId :> Get '[JSON] Price
-  :<|> StripeAuth :> QueryParam "lookup_keys" T.Text :> Get '[JSON] (StripeList Price)
+  = StripeAuth :> ReqBody '[FormUrlEncoded] PriceCreate :> Post '[JSON] Price
+  :<|> StripeAuth :> Capture ":product_id" PriceId :> Get '[JSON] Price
+  :<|> StripeAuth :> QueryParam "lookup_keys[]" T.Text :> Get '[JSON] (StripeList Price)
 
 type CheckoutApi
   = StripeAuth :> ReqBody '[FormUrlEncoded] CheckoutSessionCreate :> Post '[JSON] CheckoutSession

@@ -10,7 +10,9 @@ module Stripe.Client
   , Customer(..), CustomerCreate(..), CustomerUpdate(..)
     -- * Product catalog
   , ProductId(..), PriceId(..), Product(..), Price(..), PriceRecurring(..)
-  , retrieveProduct, retrievePrice, listPrices
+  , ProductCreate(..), PriceCreate(..), PriceCreateRecurring(..)
+  , createProduct, retrieveProduct
+  , createPrice, retrievePrice, listPrices
     -- * Checkout
   , CheckoutSessionId(..), CheckoutSession(..), CheckoutSessionCreate(..), CheckoutSessionCreateLineItem(..)
   , createCheckoutSession, retrieveCheckoutSession
@@ -70,8 +72,10 @@ EP(retrieveCustomer, CustomerId, Customer)
 EP2(updateCustomer, CustomerId, CustomerUpdate, Customer)
 EP(listCustomers, Maybe CustomerId, (StripeList Customer))
 
+EP(createProduct, ProductCreate, Product)
 EP(retrieveProduct, ProductId, Product)
 
+EP(createPrice, PriceCreate, Price)
 EP(retrievePrice, PriceId, Price)
 EP(listPrices, Maybe T.Text, (StripeList Price))
 
@@ -82,8 +86,8 @@ EP(retrieveEvent, EventId, Event)
 EP(listEvents, Maybe EventId, (StripeList Event))
 
 (createCustomer' :<|> retrieveCustomer' :<|> updateCustomer' :<|> listCustomers')
-  :<|> (retrieveProduct')
-  :<|> (retrievePrice' :<|> listPrices')
+  :<|> (createProduct' :<|> retrieveProduct')
+  :<|> (createPrice' :<|> retrievePrice' :<|> listPrices')
   :<|> (createCheckoutSession' :<|> retrieveCheckoutSession')
   :<|> (retrieveEvent' :<|> listEvents')
   = client api
