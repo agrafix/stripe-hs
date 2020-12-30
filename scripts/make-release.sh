@@ -12,6 +12,8 @@ echo "Bumping version to $VERSION ..."
 
 find . -name 'package.yaml' -type f -exec sed -i '' "s/^version:.*/version:             $VERSION/g" {} +
 
+stack build --fast --pedantic
+
 git add .
 git commit -m "version bump"
 
