@@ -10,7 +10,7 @@ module Stripe.Resources
   , Product(..), ProductCreate(..)
   , Price(..), PriceRecurring(..), PriceCreate(..), PriceCreateRecurring(..)
     -- * Subscriptions
-  , SubscriptionId(..), Subscription(..), SubscriptionItem(..), SubscriptionCreate(..), SubscriptionCreateItem(..)
+  , SubscriptionId(..), SubscriptionItemId(..), Subscription(..), SubscriptionItem(..), SubscriptionCreate(..), SubscriptionCreateItem(..)
     -- * Customer Portal
   , CustomerPortalId(..), CustomerPortal(..), CustomerPortalCreate(..)
     -- * Checkout

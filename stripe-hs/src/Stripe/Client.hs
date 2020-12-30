@@ -14,7 +14,7 @@ module Stripe.Client
   , createProduct, retrieveProduct
   , createPrice, retrievePrice, listPrices
     -- * Subscriptions
-  , SubscriptionId(..), Subscription(..), SubscriptionItem(..), SubscriptionCreate(..), SubscriptionCreateItem(..)
+  , SubscriptionId(..), SubscriptionItemId(..), Subscription(..), SubscriptionItem(..), SubscriptionCreate(..), SubscriptionCreateItem(..)
   , createSubscription, retrieveSubscription, listSubscriptions
     -- * Customer Portal
   , CustomerPortalId(..), CustomerPortal(..), CustomerPortalCreate(..)
