@@ -10,7 +10,7 @@ module Stripe.Resources
   , Product(..), ProductCreate(..)
   , Price(..), PriceRecurring(..), PriceCreate(..), PriceCreateRecurring(..)
     -- * Subscriptions
-  , SubscriptionId(..)
+  , SubscriptionId(..), Subscription(..), SubscriptionItem(..), SubscriptionCreate(..), SubscriptionCreateItem(..)
     -- * Customer Portal
   , CustomerPortalId(..), CustomerPortal(..), CustomerPortalCreate(..)
     -- * Checkout
@@ -52,12 +52,28 @@ instance A.FromJSON TimeStamp where
     A.withScientific "unix timestamp" $ \sci ->
     pure $ TimeStamp $ posixSecondsToUTCTime (fromRational $ toRational sci)
 
+instance ToHttpApiData TimeStamp where
+  toUrlPiece x =
+    let unix :: Int
+        unix = round . utcTimeToPOSIXSeconds . unTimeStamp $ x
+    in T.pack (show unix)
+
 -- | A 'V.Vector' wrapper with an indication is there are more items available through pagination.
 data StripeList a
   = StripeList
   { slHasMore :: Bool
   , slData :: V.Vector a
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Functor)
+
+instance Semigroup (StripeList a) where
+ (<>) a b = StripeList (slHasMore a || slHasMore b) (slData a <> slData b)
+
+instance Monoid (StripeList a) where
+  mempty = StripeList False mempty
+
+instance Applicative StripeList where
+  pure = StripeList False . pure
+  (<*>) go x = StripeList (slHasMore go || slHasMore x) (slData go <*> slData x)
 
 newtype CustomerId
   = CustomerId { unCustomerId :: T.Text }
@@ -164,6 +180,43 @@ newtype SubscriptionId
   = SubscriptionId { unSubscriptionId :: T.Text }
   deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
 
+data Subscription
+  = Subscription
+  { sId :: SubscriptionId
+  , sCancelAtPeriodEnd :: Bool
+  , sCurrentPeriodEnd :: TimeStamp
+  , sCurrentPeriodStart :: TimeStamp
+  , sCustomer :: CustomerId
+  , sItems :: StripeList SubscriptionItem
+  , sStatus :: T.Text -- TODO: make enum
+  } deriving (Show, Eq)
+
+newtype SubscriptionItemId
+  = SubscriptionItemId { unSubscriptionItemId :: T.Text }
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
+data SubscriptionItem
+  = SubscriptionItem
+  { siId :: SubscriptionItemId
+  , siPrice :: Price
+  , siQuantity :: Maybe Int
+  , siSubscription :: SubscriptionId
+  } deriving (Show, Eq)
+
+data SubscriptionCreateItem
+  = SubscriptionCreateItem
+  { sciPrice :: PriceId
+  , sciQuantity :: Maybe Int
+  } deriving (Show, Eq, Generic)
+
+data SubscriptionCreate
+  = SubscriptionCreate
+  { scCustomer :: CustomerId
+  , scItems :: [SubscriptionCreateItem]
+  , scCancelAtPeriodEnd :: Maybe Bool
+  , scTrialEnd :: Maybe TimeStamp
+  } deriving (Show, Eq, Generic)
+
 newtype CheckoutSessionId
   = CheckoutSessionId { unCheckoutSessionId :: T.Text }
   deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
@@ -224,6 +277,8 @@ $(deriveJSON (jsonOpts 2) ''CheckoutSession)
 $(deriveJSON (jsonOpts 1) ''Price)
 $(deriveJSON (jsonOpts 2) ''PriceRecurring)
 $(deriveJSON (jsonOpts 2) ''Product)
+$(deriveJSON (jsonOpts 1) ''Subscription)
+$(deriveJSON (jsonOpts 2) ''SubscriptionItem)
 $(deriveJSON (jsonOpts 2) ''CustomerPortal)
 
 instance ToForm CustomerCreate where
@@ -254,6 +309,21 @@ instance ToForm PriceCreate where
        , ("lookup_key", maybeToList $ pcLookupKey pc)
        , ("transfer_lookup_key", [toUrlPiece $ pcTransferLookupKey pc])
        ] <> recurringPiece
+
+instance ToForm SubscriptionCreate where
+  toForm sc =
+    let convertItem (idx, itm) =
+          [ ("items[" <> toUrlPiece idx <> "][price]", [toUrlPiece $ sciPrice itm])
+          , ("items[" <> toUrlPiece idx <> "][quantity]", maybeToList $ toUrlPiece <$> sciQuantity itm)
+          ]
+        lineItems =
+          concatMap convertItem (zip ([0..] :: [Int]) (scItems sc))
+    in Form $ HM.fromList $
+       [ ("customer", [toUrlPiece $ scCustomer sc])
+       , ("cancel_at_period_end", maybeToList $ toUrlPiece <$> scCancelAtPeriodEnd sc)
+       , ("trial_end", maybeToList $ toUrlPiece <$> scTrialEnd sc)
+       ] <> lineItems
+
 
 instance ToForm CheckoutSessionCreate where
   toForm csc =

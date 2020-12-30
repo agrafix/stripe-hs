@@ -16,6 +16,7 @@ type StripeApiInternal
   = "customers" :> CustomerApi
   :<|> "products" :> ProductApi
   :<|> "prices" :> PriceApi
+  :<|> "subscriptions" :> SubscriptionApi
   :<|> "checkout" :> "sessions" :> CheckoutApi
   :<|> "billing_portal" :> "sessions" :> CustomerPortalApi
   :<|> "events" :> EventApi
@@ -38,6 +39,11 @@ type PriceApi
   = StripeAuth :> ReqBody '[FormUrlEncoded] PriceCreate :> Post '[JSON] Price
   :<|> StripeAuth :> Capture ":product_id" PriceId :> Get '[JSON] Price
   :<|> StripeAuth :> QueryParam "lookup_keys[]" T.Text :> Get '[JSON] (StripeList Price)
+
+type SubscriptionApi
+  = StripeAuth :> ReqBody '[FormUrlEncoded] SubscriptionCreate :> Post '[JSON] Subscription
+  :<|> StripeAuth :> Capture ":subscription_id" SubscriptionId :> Get '[JSON] Subscription
+  :<|> StripeAuth :> QueryParam "customer" CustomerId :> Get '[JSON] (StripeList Subscription)
 
 type CheckoutApi
   = StripeAuth :> ReqBody '[FormUrlEncoded] CheckoutSessionCreate :> Post '[JSON] CheckoutSession

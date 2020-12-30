@@ -60,3 +60,4 @@ tests:
       - hspec
       - http-client-tls
       - vector
+      - timespan

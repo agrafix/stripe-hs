@@ -1,6 +1,8 @@
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS
 import Test.Hspec
+import Data.Time
+import Data.Time.TimeSpan
 import Data.Time.Clock.POSIX
 import System.Environment (getEnv)
 import qualified Data.Text as T
@@ -104,6 +106,34 @@ apiTests =
                pId (V.head (slData res)) `shouldBe` pId price
                res2 <- forceSuccess $ listPrices cli (Just "KEY_NOT_EXISTING_OK")
                V.null (slData res2) `shouldBe` True
+     describe "subscriptions" $
+       do it "allows creating a subscription" $ \cli ->
+            do customer <-
+                 forceSuccess $
+                 createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
+               prod <- forceSuccess $ createProduct cli (ProductCreate "Test" Nothing)
+               price <-
+                 forceSuccess $
+                 createPrice cli $
+                 PriceCreate "usd" (Just 1000) (prId prod) Nothing False $
+                 Just (PriceCreateRecurring "month" Nothing)
+               trialEnd <- TimeStamp . addUTCTimeTS (hours 1) <$> getCurrentTime
+               subscription <-
+                 forceSuccess $
+                 createSubscription cli $
+                 SubscriptionCreate
+                 { scCustomer = cId customer
+                 , scItems = [SubscriptionCreateItem (pId price) (Just 1)]
+                 , scCancelAtPeriodEnd = Just False
+                 , scTrialEnd = Just trialEnd
+                 }
+               sCancelAtPeriodEnd subscription `shouldBe` False
+               sCustomer subscription `shouldBe` cId customer
+               let items = sItems subscription
+               fmap siPrice items `shouldBe` pure price
+               fmap siQuantity items `shouldBe` pure (Just 1)
+               fmap siSubscription items `shouldBe` pure (sId subscription)
+               sStatus subscription `shouldBe` "trialing"
      describe "customer portal" $
        do it "allows creating a customer portal (needs setup in dashboard)" $ \cli ->
             do customer <-
