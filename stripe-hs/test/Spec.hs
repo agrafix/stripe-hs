@@ -16,7 +16,7 @@ makeClient :: IO StripeClient
 makeClient =
   do manager <- newManager tlsManagerSettings
      apiKey <- T.pack <$> getEnv "STRIPE_KEY"
-     pure (makeStripeClient apiKey manager)
+     pure (makeStripeClient apiKey manager 2)
 
 forceSuccess :: (MonadFail m, Show a) => m (Either a b) -> m b
 forceSuccess req =

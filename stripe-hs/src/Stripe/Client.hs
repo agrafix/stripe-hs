@@ -30,6 +30,7 @@ where
 
 import Stripe.Api
 import Stripe.Resources
+import Stripe.Client.Internal.Helpers
 
 import Data.Proxy
 import Servant.API
@@ -46,10 +47,16 @@ data StripeClient
   = StripeClient
   { scBasicAuthData :: BasicAuthData
   , scManager :: Manager
+  , scMaxRetries :: Int
   }
 
 -- | Construct a 'StripeClient'. Note that the passed 'Manager' must support https (e.g. via @http-client-tls@)
-makeStripeClient :: ApiKey -> Manager -> StripeClient
+makeStripeClient ::
+  ApiKey
+  -> Manager
+  -> Int
+  -- ^ Number of automatic retries the library should attempt. See also <https://stripe.com/docs/error-handling#safely-retrying-requests-with-idempotency Stripe Error Handling>
+  -> StripeClient
 makeStripeClient k = StripeClient (BasicAuthData (T.encodeUtf8 k) "")
 
 api :: Proxy StripeApi
@@ -61,17 +68,17 @@ stripeBaseUrl = BaseUrl Https "api.stripe.com" 443 ""
 #define EP(N, ARG, R) \
     N##' :: BasicAuthData -> ARG -> ClientM R;\
     N :: StripeClient -> ARG -> IO (Either ClientError R);\
-    N sc a = runClientM (N##' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) stripeBaseUrl)
+    N sc a = runRequest (scMaxRetries sc) 0 $ runClientM (N##' (scBasicAuthData sc) a) (mkClientEnv (scManager sc) stripeBaseUrl)
 
 #define EP2(N, ARG, ARG2, R) \
     N##' :: BasicAuthData -> ARG -> ARG2 -> ClientM R;\
     N :: StripeClient -> ARG -> ARG2 -> IO (Either ClientError R);\
-    N sc a b = runClientM (N##' (scBasicAuthData sc) a b) (mkClientEnv (scManager sc) stripeBaseUrl)
+    N sc a b = runRequest (scMaxRetries sc) 0 $ runClientM (N##' (scBasicAuthData sc) a b) (mkClientEnv (scManager sc) stripeBaseUrl)
 
 #define EP3(N, ARG, ARG2, ARG3, R) \
     N##' :: BasicAuthData -> ARG -> ARG2 -> ARG3 -> ClientM R;\
     N :: StripeClient -> ARG -> ARG2 -> ARG3 -> IO (Either ClientError R);\
-    N sc a b c = runClientM (N##' (scBasicAuthData sc) a b c) (mkClientEnv (scManager sc) stripeBaseUrl)
+    N sc a b c = runRequest (scMaxRetries sc) 0 $ runClientM (N##' (scBasicAuthData sc) a b c) (mkClientEnv (scManager sc) stripeBaseUrl)
 
 EP(createCustomer, CustomerCreate, Customer)
 EP(retrieveCustomer, CustomerId, Customer)
