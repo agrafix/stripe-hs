@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0c79f31ca0fd1ab97e10de71f797331b856aade1edfb1c13dbd3746c50d398e5
+-- hash: 4b82770025cbf946f65cc037f6aeb6f5634f2070cbbe49073a237fea81b0f94c
 
 name:           stripe-hs
-version:        0.1.2.0
+version:        0.2.0.0
 synopsis:       Unofficial Stripe client
 description:    Unofficial Stripe client
 category:       Web

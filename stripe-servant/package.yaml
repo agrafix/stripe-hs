@@ -1,5 +1,5 @@
 name:                stripe-servant
-version:             0.1.2.0
+version:             0.2.0.0
 github:              "agrafix/stripe-hs"
 license:             BSD3
 author:              "Alexander Thiemann <mail@thiemann.at>"
