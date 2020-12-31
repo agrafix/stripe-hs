@@ -62,3 +62,5 @@ tests:
       - http-client-tls
       - vector
       - timespan
+      - containers
+      - servant-client-core
