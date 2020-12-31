@@ -2,7 +2,7 @@
 {-# LANGUAGE CPP #-}
 module Stripe.Client
   ( -- * Basics
-    ApiKey, StripeClient, makeStripeClient
+    ApiKey, StripeClient, makeStripeClient, ClientError(..)
     -- * Helper types
   , TimeStamp(..), StripeList(..)
     -- * Customers
