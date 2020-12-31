@@ -7,7 +7,7 @@ module Stripe.Client
   , TimeStamp(..), StripeList(..)
     -- * Customers
   , createCustomer, retrieveCustomer, updateCustomer, listCustomers
-  , Customer(..), CustomerCreate(..), CustomerUpdate(..)
+  , CustomerId(..), Customer(..), CustomerCreate(..), CustomerUpdate(..)
     -- * Product catalog
   , ProductId(..), PriceId(..), Product(..), Price(..), PriceRecurring(..)
   , ProductCreate(..), PriceCreate(..), PriceCreateRecurring(..)
@@ -24,7 +24,7 @@ module Stripe.Client
   , createCheckoutSession, retrieveCheckoutSession
     -- * Events
   , retrieveEvent, listEvents
-  , Event(..), EventData(..)
+  , EventId(..), Event(..), EventData(..)
   )
 where
 
