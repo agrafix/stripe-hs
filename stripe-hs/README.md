@@ -36,7 +36,7 @@ main =
 
 The package provides a module for webhook signature verification (see `Stripe.Webhook.Verify`).
 
-The implementation retries automatically according to [Stripe's error handling documentation](https://stripe.com/docs/error-handling#safely-retrying-requests-with-idempotency Stripe Error Handling).
+The implementation retries automatically according to [Stripe's error handling documentation](https://stripe.com/docs/error-handling#safely-retrying-requests-with-idempotency).
 
 Supported APIs/Resources:
 * Customers
