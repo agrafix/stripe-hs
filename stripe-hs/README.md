@@ -26,6 +26,8 @@ main :: IO ()
 main =
   do manager <- newManager tlsManagerSettings
      apiKey <- T.pack <$> getEnv "STRIPE_KEY"
+     -- create a stripe client that automatically retries up to 4 times on network
+     -- errors
      let client = makeStripeClient apiKey manager 4
      result <-
          createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
@@ -38,7 +40,8 @@ The package provides a module for webhook signature verification (see `Stripe.We
 
 The implementation retries automatically according to [Stripe's error handling documentation](https://stripe.com/docs/error-handling#safely-retrying-requests-with-idempotency).
 
-Supported APIs/Resources:
+### Supported APIs/Resources:
+
 * Customers
 * Products
 * Prices
