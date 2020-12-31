@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: adffc8b9111d2ec32df38ec44a5bc1e89208a6e1f026a206b6e8916b5fc8212a
+-- hash: ddf6361d6626079588fbe50aa6741d6eea065cb93fa602ad4c538c44ccb2c69d
 
 name:           stripe-servant
-version:        0.2.0.0
+version:        0.2.1.0
 synopsis:       Unofficial Stripe servant types
 description:    Unofficial description of the Stripe API using servant types
 category:       Web
