@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 85818c2da52f030797bf3f51743a267c5e456e10684a6ac9a21f06555bbe8107
+-- hash: 68f2adee11ef8d97eaf6e2e78a35874118af4c1289aab870ba382bbeff53689e
 
 name:           stripe-hs
 version:        0.1.2.0
@@ -58,6 +58,8 @@ test-suite stripe-hs-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ApiSpec
+      WebhookSpec
       Paths_stripe_hs
   hs-source-dirs:
       test
