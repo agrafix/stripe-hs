@@ -116,7 +116,8 @@ apiWorldTests :: SpecWith ()
 apiWorldTests =
   beforeAll makeStripeWorld $
   do describe "subscriptions" $
-       do it "allows creating a subscription" $ \(cli, sw) ->
+       do 
+         it "allows creating a subscription" $ \(cli, sw) ->
             do trialEnd <- TimeStamp . addUTCTimeTS (hours 1) <$> getCurrentTime
                subscription <-
                  forceSuccess $
@@ -133,7 +134,14 @@ apiWorldTests =
                fmap siPrice items `shouldBe` pure (swPrice sw)
                fmap siQuantity items `shouldBe` pure (Just 1)
                fmap siSubscription items `shouldBe` pure (sId subscription)
-               sStatus subscription `shouldBe` "trialing"
+               sStatus subscription `shouldBe` "trialing"        
+         it "updates a subscription" $ \(cli, sw) ->
+           do let customerId = cId (swCustomer sw)
+              subscriptions <- forceSuccess $ listSubscriptions cli (Just customerId)
+              let subscriptionId = sId (V.head (slData subscriptions))
+                  subscriptionUpdate = SubscriptionUpdate (Just "charge_automatically") Nothing
+              res <- forceSuccess $ updateSubscription cli subscriptionId subscriptionUpdate
+              sCollectionMethod res `shouldBe` Just "charge_automatically"
      describe "customer portal" $
        do it "allows creating a customer portal (needs setup in dashboard)" $ \(cli, sw) ->
             do portal <-
@@ -159,8 +167,47 @@ apiWorldTests =
                csCancelUrl session `shouldBe` "https://athiemann.net/cancel"
                csSuccessUrl session `shouldBe` "https://athiemann.net/success"
                csPaymentMethodTypes session `shouldBe` V.singleton "card"
-
                sessionRetrieved <-
                  forceSuccess $
                  retrieveCheckoutSession cli (csId session)
                sessionRetrieved `shouldBe` session
+     describe "invoices" $
+       do
+         it "list and retrieve invoices" $ \(cli, sw) ->
+            do
+              let customerId = cId (swCustomer sw)
+              invoices <- forceSuccess $ listInvoices cli (Just customerId) (Just "data.payment_intent")
+              iCustomer (V.head (slData invoices)) `shouldBe` customerId
+              iPaymentIntent (V.head (slData invoices)) `shouldBe` Nothing
+              invoice <- forceSuccess $ retrieveInvoice cli $ iId (V.head (slData invoices))
+              iId (V.head (slData invoices)) `shouldBe` iId invoice
+     describe "payment methods" $
+       do
+         it "attach payment method to customer" $ \(cli, sw) ->
+           do
+              let customerId = cId (swCustomer sw)
+              paymentMethod <- forceSuccess $ 
+                createPaymentMethod cli $
+                  PaymentMethodCreate
+                    { pmcExpMonth = 12
+                    , pmcExpYear = 2023
+                    , pmcCVC = 123
+                    , pmcNumber = 4242424242424242
+                    , pmcType = "card"
+                    }
+              let paymentMethodId = pmId paymentMethod 
+              pmType paymentMethod `shouldBe` "card"
+              res <- forceSuccess $ attachPaymentMethod cli paymentMethodId (Just customerId)
+              pmId res `shouldBe` paymentMethodId
+              pmCard res
+                `shouldBe` Card
+                    { cExpMonth = 12
+                    , cExpYear = 2023
+                    , cLast4 = "4242"                 
+                    }
+         it "list payment methods" $ \(cli, sw) ->
+           do
+             let customerId = cId (swCustomer sw)
+             paymentMethods <- forceSuccess $ listPaymentMethods cli (Just customerId) (Just "card")
+             let paymentMethodId = pmId (V.head (slData paymentMethods))
+             pmType (V.head (slData paymentMethods)) `shouldBe` "card"
