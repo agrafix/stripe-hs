@@ -17,6 +17,8 @@ type StripeApiInternal
   :<|> "products" :> ProductApi
   :<|> "prices" :> PriceApi
   :<|> "subscriptions" :> SubscriptionApi
+  :<|> "invoices" :> InvoiceApi
+  :<|> "payment_methods" :> PaymentMethodApi
   :<|> "checkout" :> "sessions" :> CheckoutApi
   :<|> "billing_portal" :> "sessions" :> CustomerPortalApi
   :<|> "events" :> EventApi
@@ -40,10 +42,18 @@ type PriceApi
   :<|> StripeAuth :> Capture ":product_id" PriceId :> Get '[JSON] Price
   :<|> StripeAuth :> QueryParam "lookup_keys[]" T.Text :> Get '[JSON] (StripeList Price)
 
-type SubscriptionApi
-  = StripeAuth :> ReqBody '[FormUrlEncoded] SubscriptionCreate :> Post '[JSON] Subscription
-  :<|> StripeAuth :> Capture ":subscription_id" SubscriptionId :> Get '[JSON] Subscription
-  :<|> StripeAuth :> QueryParam "customer" CustomerId :> Get '[JSON] (StripeList Subscription)
+type InvoiceApi =
+  StripeAuth :> Capture ":invoice_id" InvoiceId :> Get '[JSON] Invoice
+    :<|> StripeAuth :> QueryParam "customer" CustomerId :> QueryParam "expand[]" T.Text :> Get '[JSON] (StripeList Invoice)
+
+type PaymentMethodApi =
+  StripeAuth :> QueryParam "customer" CustomerId :> QueryParam "type" T.Text :> Get '[JSON] (StripeList PaymentMethod)
+
+type SubscriptionApi =
+  StripeAuth :> ReqBody '[FormUrlEncoded] SubscriptionCreate :> Post '[JSON] Subscription
+    :<|> StripeAuth :> Capture ":subscription_id" SubscriptionId :> Get '[JSON] Subscription
+    :<|> StripeAuth :> QueryParam "customer" CustomerId :> Get '[JSON] (StripeList Subscription)
+    :<|> StripeAuth :> Capture ":subscription_id" SubscriptionId :> ReqBody '[FormUrlEncoded] SubscriptionUpdate :> Post '[JSON] Subscription
 
 type CheckoutApi
   = StripeAuth :> ReqBody '[FormUrlEncoded] CheckoutSessionCreate :> Post '[JSON] CheckoutSession

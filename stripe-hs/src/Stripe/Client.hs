@@ -14,8 +14,20 @@ module Stripe.Client
   , createProduct, retrieveProduct
   , createPrice, retrievePrice, listPrices
     -- * Subscriptions
-  , SubscriptionId(..), SubscriptionItemId(..), Subscription(..), SubscriptionItem(..), SubscriptionCreate(..), SubscriptionCreateItem(..)
-  , createSubscription, retrieveSubscription, listSubscriptions
+  , SubscriptionId(..), SubscriptionItemId(..), Subscription(..), SubscriptionItem(..)
+  , SubscriptionCreate(..), SubscriptionCreateItem(..), SubscriptionUpdate(..)
+  , createSubscription, retrieveSubscription, listSubscriptions, updateSubscription
+    -- * Invoices
+  , listInvoices, retrieveInvoice
+  , InvoiceId(..), Invoice(..)
+    -- * Payment Methods
+  , listPaymentMethods
+    -- * Payment Method
+  , PaymentMethodId(..), PaymentMethod(..)
+    -- * Payment Intent
+  , PaymentIntent(..)
+    -- * Card
+  , Card(..)
     -- * Customer Portal
   , CustomerPortalId(..), CustomerPortal(..), CustomerPortalCreate(..)
   , createCustomerPortal
@@ -95,6 +107,12 @@ EP(listPrices, Maybe T.Text, (StripeList Price))
 EP(createSubscription, SubscriptionCreate, Subscription)
 EP(retrieveSubscription, SubscriptionId, Subscription)
 EP(listSubscriptions, Maybe CustomerId, (StripeList Subscription))
+EP2(updateSubscription, SubscriptionId, SubscriptionUpdate, Subscription)
+
+EP(retrieveInvoice, InvoiceId, Invoice)
+EP2(listInvoices, Maybe CustomerId, Maybe T.Text, (StripeList Invoice))
+
+EP2(listPaymentMethods, Maybe CustomerId, Maybe T.Text, (StripeList PaymentMethod))
 
 EP(createCheckoutSession, CheckoutSessionCreate, CheckoutSession)
 EP(retrieveCheckoutSession, CheckoutSessionId, CheckoutSession)
@@ -107,8 +125,10 @@ EP(listEvents, Maybe EventId, (StripeList Event))
 (createCustomer' :<|> retrieveCustomer' :<|> updateCustomer' :<|> listCustomers')
   :<|> (createProduct' :<|> retrieveProduct')
   :<|> (createPrice' :<|> retrievePrice' :<|> listPrices')
-  :<|> (createSubscription' :<|> retrieveSubscription' :<|> listSubscriptions')
+  :<|> (createSubscription' :<|> retrieveSubscription' :<|> listSubscriptions' :<|> updateSubscription')
+  :<|> (retrieveInvoice' :<|> listInvoices')
+  :<|> (listPaymentMethods')
   :<|> (createCheckoutSession' :<|> retrieveCheckoutSession')
   :<|> (createCustomerPortal')
-  :<|> (retrieveEvent' :<|> listEvents')
+  :<|> (retrieveEvent' :<|> listEvents') 
   = client api

@@ -3,6 +3,7 @@ module ApiSpec (apiSpec) where
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS
 import Test.Hspec
+import Data.Either
 import Data.Time
 import Data.Time.TimeSpan
 import System.Environment (getEnv)
@@ -116,7 +117,8 @@ apiWorldTests :: SpecWith ()
 apiWorldTests =
   beforeAll makeStripeWorld $
   do describe "subscriptions" $
-       do it "allows creating a subscription" $ \(cli, sw) ->
+       do 
+         it "allows creating a subscription" $ \(cli, sw) ->
             do trialEnd <- TimeStamp . addUTCTimeTS (hours 1) <$> getCurrentTime
                subscription <-
                  forceSuccess $
@@ -133,7 +135,14 @@ apiWorldTests =
                fmap siPrice items `shouldBe` pure (swPrice sw)
                fmap siQuantity items `shouldBe` pure (Just 1)
                fmap siSubscription items `shouldBe` pure (sId subscription)
-               sStatus subscription `shouldBe` "trialing"
+               sStatus subscription `shouldBe` "trialing"        
+         it "updates a subscription" $ \(cli, sw) ->
+           do let customerId = cId (swCustomer sw)
+              subscriptions <- forceSuccess $ listSubscriptions cli (Just customerId)
+              let subscriptionId = sId (V.head (slData subscriptions))
+                  subscriptionUpdate = SubscriptionUpdate (Just "charge_automatically") Nothing
+              res <- forceSuccess $ updateSubscription cli subscriptionId subscriptionUpdate
+              sCollectionMethod res `shouldBe` "charge_automatically"
      describe "customer portal" $
        do it "allows creating a customer portal (needs setup in dashboard)" $ \(cli, sw) ->
             do portal <-
@@ -159,8 +168,30 @@ apiWorldTests =
                csCancelUrl session `shouldBe` "https://athiemann.net/cancel"
                csSuccessUrl session `shouldBe` "https://athiemann.net/success"
                csPaymentMethodTypes session `shouldBe` V.singleton "card"
-
                sessionRetrieved <-
                  forceSuccess $
                  retrieveCheckoutSession cli (csId session)
                sessionRetrieved `shouldBe` session
+     describe "invoices" $
+       do
+         it "list and retrieve invoices" $ \(cli, sw) ->
+            do
+              let customerId = cId (swCustomer sw)
+              invoices <- forceSuccess $ listInvoices cli (Just customerId) (Just "data.payment_intent")
+              iCustomer (V.head (slData invoices)) `shouldBe` customerId
+              invoice <- forceSuccess $ retrieveInvoice cli $ iId (V.head (slData invoices))
+              iId (V.head (slData invoices)) `shouldBe` iId invoice
+              iPaymentIntent (V.head (slData invoices)) `shouldBe` Nothing
+     describe "payment methods" $
+       do
+         it "list payment methods" $ \(cli, sw) ->
+           do
+             paymentMethod <- T.pack <$> getEnv "STRIPE_PMID"
+             customer <- T.pack <$> getEnv "STRIPE_CMID"
+             let cmId' = CustomerId customer
+                 pmId' = PaymentMethodId paymentMethod
+             paymentMethods <- forceSuccess $ listPaymentMethods cli (Just cmId') (Just "card")
+             let paymentMethodId = pmId (V.head (slData paymentMethods))
+                 cardType = pmType (V.head (slData paymentMethods))
+             cardType `shouldBe` "card"
+             paymentMethodId `shouldBe` pmId'
