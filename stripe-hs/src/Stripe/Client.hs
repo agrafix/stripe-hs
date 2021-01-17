@@ -19,7 +19,7 @@ module Stripe.Client
   , createSubscription, retrieveSubscription, listSubscriptions, updateSubscription
     -- * Invoices
   , listInvoices, retrieveInvoice
-  , InvoiceId(..), Invoice(..)
+  , InvoiceId(..), Invoice(..), InvoiceSettings(..)
     -- * Payment Methods
   , listPaymentMethods
     -- * Payment Method

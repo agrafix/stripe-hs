@@ -89,7 +89,9 @@ apiTests =
                cu `shouldBe` cr
           it "updates a customer" $ \cli ->
             do cr <- forceSuccess $ createCustomer cli (CustomerCreate Nothing (Just "mail@athiemann.net"))
-               cu <- forceSuccess $ updateCustomer cli (cId cr) (CustomerUpdate Nothing (Just "mail+2@athiemann.net"))
+               let customerUpdate = 
+                    CustomerUpdate Nothing (Just "mail+2@athiemann.net") Nothing
+               cu <- forceSuccess $ updateCustomer cli (cId cr) customerUpdate
                cEmail cu `shouldBe` Just "mail+2@athiemann.net"
 
 data StripeWorld
