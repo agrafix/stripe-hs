@@ -9,8 +9,16 @@ module Stripe.Resources
   , ProductId(..), PriceId(..)
   , Product(..), ProductCreate(..)
   , Price(..), PriceRecurring(..), PriceCreate(..), PriceCreateRecurring(..)
+    -- * Invoices
+  , InvoiceId(..), Invoice(..), InvoiceSettings(..)
+    -- * Payment Method
+  , PaymentMethodId(..), PaymentMethod(..), PaymentMethodCreate(..)
+    -- * Card
+  , Card(..)
     -- * Subscriptions
-  , SubscriptionId(..), SubscriptionItemId(..), Subscription(..), SubscriptionItem(..), SubscriptionCreate(..), SubscriptionCreateItem(..)
+  , SubscriptionId(..), SubscriptionItemId(..), Subscription(..)
+  , SubscriptionItem(..), SubscriptionCreate(..)
+  , SubscriptionCreateItem(..), SubscriptionUpdate(..)
     -- * Customer Portal
   , CustomerPortalId(..), CustomerPortal(..), CustomerPortalCreate(..)
     -- * Checkout
@@ -98,6 +106,7 @@ data CustomerUpdate
   = CustomerUpdate
   { cuName :: Maybe T.Text
   , cuEmail :: Maybe T.Text
+  , cuInvoiceSettings :: Maybe InvoiceSettings
   } deriving (Show, Eq, Generic)
 
 newtype EventId
@@ -158,6 +167,67 @@ data PriceCreateRecurring
   , prcIntervalCount :: Maybe Int
   } deriving (Show, Eq)
 
+newtype InvoiceId = InvoiceId {unInvoiceId :: T.Text}
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
+newtype InvoiceSettings = InvoiceSettings
+  { isDefaultPaymentMethod :: Maybe T.Text
+  }
+  deriving (Show, Eq)
+
+data PaymentIntent = PaymentIntent
+  { piPaymentMethod :: Maybe T.Text,
+    piStatus :: Maybe T.Text
+  }
+  deriving (Show, Eq)
+
+data Invoice = Invoice
+  { iId :: InvoiceId,
+    iCollectionMethod :: T.Text,
+    iCustomer :: CustomerId,
+    iHostedInvoiceURL :: Maybe T.Text,
+    iCreated :: Maybe Int,
+    iAmountDue :: Maybe Int,
+    iAmountPaid :: Maybe Int,
+    iStatus :: T.Text,
+    iPaymentIntent :: Maybe PaymentIntent
+  }
+  deriving (Show, Eq)
+
+newtype PaymentMethodId = PaymentMethodId {unPaymentMethodId :: T.Text}
+  deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
+
+data BillingDetails = BillingDetails
+  { blEmail :: Maybe T.Text,
+    blName :: Maybe T.Text,
+    blPhone :: Maybe T.Text
+  }
+  deriving (Show, Eq)
+
+data Card = Card
+  { cExpMonth :: Int
+  , cExpYear :: Int
+  , cLast4 :: String
+  }
+  deriving (Show, Eq)
+
+data PaymentMethod = PaymentMethod
+  { pmId :: PaymentMethodId,
+    pmType :: T.Text,
+    pmBillingDetails :: BillingDetails,
+    pmCard :: Card
+  }
+  deriving (Show, Eq)
+
+data PaymentMethodCreate = PaymentMethodCreate
+  { pmcExpMonth :: Int
+  , pmcExpYear :: Int
+  , pmcCVC :: Int
+  , pmcNumber :: Int
+  , pmcType :: T.Text
+  }
+  deriving (Show, Eq, Generic)
+
 newtype ProductId
   = ProductId { unProductId :: T.Text }
   deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
@@ -184,6 +254,7 @@ data Subscription
   = Subscription
   { sId :: SubscriptionId
   , sCancelAtPeriodEnd :: Bool
+  , sCollectionMethod :: Maybe T.Text
   , sCurrentPeriodEnd :: TimeStamp
   , sCurrentPeriodStart :: TimeStamp
   , sCustomer :: CustomerId
@@ -216,6 +287,12 @@ data SubscriptionCreate
   , scCancelAtPeriodEnd :: Maybe Bool
   , scTrialEnd :: Maybe TimeStamp
   } deriving (Show, Eq, Generic)
+
+data SubscriptionUpdate = SubscriptionUpdate
+  { suCollectionMethod :: Maybe T.Text,
+    suDaysUntilDue :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
 
 newtype CheckoutSessionId
   = CheckoutSessionId { unCheckoutSessionId :: T.Text }
@@ -277,6 +354,11 @@ $(deriveJSON (jsonOpts 2) ''CheckoutSession)
 $(deriveJSON (jsonOpts 1) ''Price)
 $(deriveJSON (jsonOpts 2) ''PriceRecurring)
 $(deriveJSON (jsonOpts 2) ''Product)
+$(deriveJSON (jsonOpts 2) ''PaymentIntent)
+$(deriveJSON (jsonOpts 1) ''Invoice)
+$(deriveJSON (jsonOpts 2) ''PaymentMethod)
+$(deriveJSON (jsonOpts 2) ''BillingDetails)
+$(deriveJSON (jsonOpts 1) ''Card)
 $(deriveJSON (jsonOpts 1) ''Subscription)
 $(deriveJSON (jsonOpts 2) ''SubscriptionItem)
 $(deriveJSON (jsonOpts 2) ''CustomerPortal)
@@ -285,7 +367,19 @@ instance ToForm CustomerCreate where
   toForm = genericToForm (formOptions 2)
 
 instance ToForm CustomerUpdate where
-  toForm = genericToForm (formOptions 2)
+  toForm cu =
+    let invoiceSettings =
+          case cuInvoiceSettings cu of
+            Nothing -> []
+            Just x ->
+              [ ("invoice_settings[default_payment_method]", maybeToList $ isDefaultPaymentMethod x)
+              ]
+     in Form $
+          HM.fromList $
+            [ ("name", maybeToList $ cuName cu),
+              ("email", maybeToList $ cuEmail cu)
+            ]
+              <> invoiceSettings
 
 instance ToForm CustomerPortalCreate where
   toForm = genericToForm (formOptions 3)
@@ -310,6 +404,17 @@ instance ToForm PriceCreate where
        , ("transfer_lookup_key", [toUrlPiece $ pcTransferLookupKey pc])
        ] <> recurringPiece
 
+instance ToForm PaymentMethodCreate where
+  toForm pmc =
+    Form $
+      HM.fromList
+        [ ("type", [pmcType pmc])
+        , ("card[number]", [toUrlPiece $ pmcNumber pmc])
+        , ("card[exp_month]", [toUrlPiece $ pmcExpMonth pmc])
+        , ("card[exp_year]", [toUrlPiece $ pmcExpYear pmc])
+        , ("card[cvc]", [toUrlPiece $ pmcCVC pmc])
+        ]
+
 instance ToForm SubscriptionCreate where
   toForm sc =
     let convertItem (idx, itm) =
@@ -324,6 +429,8 @@ instance ToForm SubscriptionCreate where
        , ("trial_end", maybeToList $ toUrlPiece <$> scTrialEnd sc)
        ] <> lineItems
 
+instance ToForm SubscriptionUpdate where
+  toForm = genericToForm (formOptions 2)
 
 instance ToForm CheckoutSessionCreate where
   toForm csc =
