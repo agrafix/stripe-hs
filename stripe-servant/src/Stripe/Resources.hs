@@ -106,6 +106,7 @@ data CustomerUpdate
   = CustomerUpdate
   { cuName :: Maybe T.Text
   , cuEmail :: Maybe T.Text
+  , cuInvoiceSettings :: Maybe InvoiceSettings
   } deriving (Show, Eq, Generic)
 
 newtype EventId
@@ -366,7 +367,19 @@ instance ToForm CustomerCreate where
   toForm = genericToForm (formOptions 2)
 
 instance ToForm CustomerUpdate where
-  toForm = genericToForm (formOptions 2)
+  toForm cu =
+    let invoiceSettings =
+          case cuInvoiceSettings cu of
+            Nothing -> []
+            Just x ->
+              [ ("invoice_settings[default_payment_method]", maybeToList $ isDefaultPaymentMethod x)
+              ]
+     in Form $
+          HM.fromList $
+            [ ("name", maybeToList $ cuName cu),
+              ("email", maybeToList $ cuEmail cu)
+            ]
+              <> invoiceSettings
 
 instance ToForm CustomerPortalCreate where
   toForm = genericToForm (formOptions 3)
