@@ -230,6 +230,7 @@ data CheckoutSession
   , csSuccessUrl :: T.Text
   , csPaymentMethodTypes :: V.Vector T.Text  -- TODO: make enum
   , csSubscription :: Maybe SubscriptionId
+  , csAllowPromotionCodes :: Maybe Bool
   } deriving (Show, Eq)
 
 data CheckoutSessionCreate
@@ -240,6 +241,7 @@ data CheckoutSessionCreate
   , cscSuccessUrl :: T.Text
   , cscClientReferenceId :: Maybe T.Text
   , cscCustomer :: Maybe CustomerId
+  , cscAllowPromotionCodes :: Maybe Bool
   , cscLineItems :: [CheckoutSessionCreateLineItem]
   } deriving (Show, Eq, Generic)
 
@@ -345,4 +347,5 @@ instance ToForm CheckoutSessionCreate where
        , ("mode", [cscMode csc])
        , ("client_reference_id", maybeToList $ cscClientReferenceId csc)
        , ("customer", maybeToList $ fmap toUrlPiece $ cscCustomer csc)
+       , ("allow_promotion_codes", maybeToList $ toUrlPiece <$> cscAllowPromotionCodes csc)
        ] <> lineItems <> pmt
