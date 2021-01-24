@@ -153,12 +153,14 @@ apiWorldTests =
                  , cscSuccessUrl = "https://athiemann.net/success"
                  , cscClientReferenceId = Just "cool"
                  , cscCustomer = Just (cId (swCustomer sw))
+                 , cscAllowPromotionCodes = Just True
                  , cscLineItems = [CheckoutSessionCreateLineItem (pId (swPrice sw)) 1]
                  }
                csClientReferenceId session `shouldBe` Just "cool"
                csCancelUrl session `shouldBe` "https://athiemann.net/cancel"
                csSuccessUrl session `shouldBe` "https://athiemann.net/success"
                csPaymentMethodTypes session `shouldBe` V.singleton "card"
+               csAllowPromotionCodes session `shouldBe` Just True
 
                sessionRetrieved <-
                  forceSuccess $
