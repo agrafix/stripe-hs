@@ -188,6 +188,7 @@ apiWorldTests =
        do
          it "list payment methods" $ \(cli, sw) ->
            do
+             -- An existing customer with a PaymentMehod attach needs to exist
              paymentMethod <- T.pack <$> getEnv "STRIPE_PMID"
              customer <- T.pack <$> getEnv "STRIPE_CMID"
              let cmId' = CustomerId customer
