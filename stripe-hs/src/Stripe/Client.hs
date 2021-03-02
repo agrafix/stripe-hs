@@ -25,7 +25,7 @@ module Stripe.Client
     -- * Payment Method
   , PaymentMethodId(..), PaymentMethod(..)
     -- * Payment Intent
-  , PaymentIntent(..)
+  , PaymentIntent(..), PaymentIntentOrId(..)
     -- * Card
   , Card(..)
     -- * Customer Portal

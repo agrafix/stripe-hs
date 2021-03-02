@@ -14,7 +14,7 @@ module Stripe.Resources
     -- * Payment Method
   , PaymentMethodId(..), PaymentMethod(..)
     -- * Payment Intent
-  , PaymentIntent(..)
+  , PaymentIntent(..), PaymentIntentOrId(..)
     -- * Card
   , Card(..)
     -- * Subscriptions
@@ -32,6 +32,7 @@ where
 
 import Stripe.Util.Aeson
 
+import Control.Applicative
 import Data.Maybe
 import Data.Time
 import Data.Time.Clock.POSIX
@@ -173,7 +174,7 @@ newtype InvoiceId = InvoiceId {unInvoiceId :: T.Text}
   deriving (Show, Eq, ToJSON, FromJSON, ToHttpApiData)
 
 newtype InvoiceSettings = InvoiceSettings
-  { isDefaultPaymentMethod :: Maybe T.Text
+  { isDefaultPaymentMethod :: Maybe PaymentMethodId
   }
   deriving (Show, Eq)
 
@@ -187,6 +188,17 @@ data PaymentIntent = PaymentIntent
   }
   deriving (Show, Eq)
 
+data PaymentIntentOrId
+  = PiId PaymentIntentId
+  | PiIntent PaymentIntent
+  deriving (Show, Eq, Generic)
+
+instance FromJSON PaymentIntentOrId where
+  parseJSON value = 
+    fmap PiId (A.parseJSON value) <|> fmap PiIntent (A.parseJSON value)
+
+instance ToJSON PaymentIntentOrId
+
 data Invoice = Invoice
   { iId :: InvoiceId,
     iCollectionMethod :: T.Text,
@@ -195,9 +207,9 @@ data Invoice = Invoice
     iCreated :: Maybe TimeStamp,
     iAmountDue :: Maybe Int,
     iAmountPaid :: Maybe Int,
-    iCurrency :: Maybe T.Text,
+    iCurrency :: T.Text,
     iStatus :: T.Text,
-    iPaymentIntent :: Maybe (Either PaymentIntentId PaymentIntent)
+    iPaymentIntent :: Maybe PaymentIntentOrId
   }
   deriving (Show, Eq)
 
@@ -371,7 +383,7 @@ instance ToForm CustomerUpdate where
           case cuInvoiceSettings cu of
             Nothing -> []
             Just x ->
-              [ ("invoice_settings[default_payment_method]", maybeToList $ isDefaultPaymentMethod x)
+              [ ("invoice_settings[default_payment_method]", maybeToList $ toUrlPiece <$> isDefaultPaymentMethod x)
               ]
      in Form $
           HM.fromList $
