@@ -204,7 +204,16 @@ apiWorldTests =
              let cmId' = CustomerId customer
                  pmId' = PaymentMethodId paymentMethod
              paymentMethods <- forceSuccess $ listPaymentMethods cli (Just cmId') (Just "card")
+             let hasPaymentMethods :: V.Vector PaymentMethod -> Bool
+                 hasPaymentMethods pms = (not . null) pms
+             slData paymentMethods `shouldSatisfy` hasPaymentMethods
              let paymentMethodId = pmId (V.head (slData paymentMethods))
                  cardType = pmType (V.head (slData paymentMethods))
              cardType `shouldBe` "card"
              paymentMethodId `shouldBe` pmId'
+         it "retrieve payment method" $ \(cli, sw) ->
+           do
+             paymentMethod <- T.pack <$> getEnv "STRIPE_PMID"
+             let pmId' = PaymentMethodId paymentMethod
+             paymentMethod <- forceSuccess $ retrievePaymentMethod cli pmId'
+             pmId paymentMethod `shouldBe` pmId'
