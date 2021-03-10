@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4019c187792644a71d436254a7f82084129aa53d02bd6af7b098b805c7ce4a38
+-- hash: bb6b65eca318fa7ead03a4c4e4713e1fb81011a04cca34f2acced717332b2c9d
 
 name:           stripe-hs
-version:        0.2.1.0
+version:        0.3.0.0
 synopsis:       Unofficial Stripe client
 description:    Unofficial Stripe client
 category:       Web
@@ -15,7 +15,7 @@ homepage:       https://github.com/agrafix/stripe-hs#readme
 bug-reports:    https://github.com/agrafix/stripe-hs/issues
 author:         Alexander Thiemann <mail@thiemann.at>
 maintainer:     Alexander Thiemann <mail@thiemann.at>
-copyright:      2020 Alexander Thiemann <mail@thiemann.at>
+copyright:      2020-2021 Alexander Thiemann <mail@thiemann.at>
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple

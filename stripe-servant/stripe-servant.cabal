@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ddf6361d6626079588fbe50aa6741d6eea065cb93fa602ad4c538c44ccb2c69d
+-- hash: 1abd3898b7ca575a0cf267fc7887fd59c7b166197a463357cb1a81b2fc3b48d5
 
 name:           stripe-servant
-version:        0.2.1.0
+version:        0.3.0.0
 synopsis:       Unofficial Stripe servant types
 description:    Unofficial description of the Stripe API using servant types
 category:       Web
@@ -15,7 +15,7 @@ homepage:       https://github.com/agrafix/stripe-hs#readme
 bug-reports:    https://github.com/agrafix/stripe-hs/issues
 author:         Alexander Thiemann <mail@thiemann.at>
 maintainer:     Alexander Thiemann <mail@thiemann.at>
-copyright:      2020 Alexander Thiemann <mail@thiemann.at>
+copyright:      2020-2021 Alexander Thiemann <mail@thiemann.at>
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
