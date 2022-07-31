@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bb6b65eca318fa7ead03a4c4e4713e1fb81011a04cca34f2acced717332b2c9d
+-- hash: 9f03892172dc0b897e046a18ed88f2eb289e965983aabb93c315f6416d0c19e6
 
 name:           stripe-hs
 version:        0.3.0.0
@@ -35,7 +35,19 @@ library
       Paths_stripe_hs
   hs-source-dirs:
       src
-  default-extensions: OverloadedStrings DataKinds TypeOperators TypeFamilies GADTs FlexibleInstances FlexibleContexts MultiParamTypeClasses StrictData ScopedTypeVariables DeriveGeneric DeriveFunctor
+  default-extensions:
+      OverloadedStrings
+      DataKinds
+      TypeOperators
+      TypeFamilies
+      GADTs
+      FlexibleInstances
+      FlexibleContexts
+      MultiParamTypeClasses
+      StrictData
+      ScopedTypeVariables
+      DeriveGeneric
+      DeriveFunctor
   build-depends:
       aeson
     , base >=4.7 && <5
@@ -64,7 +76,19 @@ test-suite stripe-hs-test
       Paths_stripe_hs
   hs-source-dirs:
       test
-  default-extensions: OverloadedStrings DataKinds TypeOperators TypeFamilies GADTs FlexibleInstances FlexibleContexts MultiParamTypeClasses StrictData ScopedTypeVariables DeriveGeneric DeriveFunctor
+  default-extensions:
+      OverloadedStrings
+      DataKinds
+      TypeOperators
+      TypeFamilies
+      GADTs
+      FlexibleInstances
+      FlexibleContexts
+      MultiParamTypeClasses
+      StrictData
+      ScopedTypeVariables
+      DeriveGeneric
+      DeriveFunctor
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson

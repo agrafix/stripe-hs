@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1abd3898b7ca575a0cf267fc7887fd59c7b166197a463357cb1a81b2fc3b48d5
+-- hash: f41e3124a968ee1a315af4f3f27173d8f4c4f1ca22042adb63ac099139de155b
 
 name:           stripe-servant
-version:        0.3.0.0
+version:        0.3.1.0
 synopsis:       Unofficial Stripe servant types
 description:    Unofficial description of the Stripe API using servant types
 category:       Web
@@ -15,7 +15,7 @@ homepage:       https://github.com/agrafix/stripe-hs#readme
 bug-reports:    https://github.com/agrafix/stripe-hs/issues
 author:         Alexander Thiemann <mail@thiemann.at>
 maintainer:     Alexander Thiemann <mail@thiemann.at>
-copyright:      2020-2021 Alexander Thiemann <mail@thiemann.at>
+copyright:      2020-2022 Alexander Thiemann <mail@thiemann.at>
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -35,7 +35,19 @@ library
       Paths_stripe_servant
   hs-source-dirs:
       src
-  default-extensions: OverloadedStrings DataKinds TypeOperators TypeFamilies GADTs FlexibleInstances FlexibleContexts MultiParamTypeClasses StrictData ScopedTypeVariables DeriveGeneric DeriveFunctor
+  default-extensions:
+      OverloadedStrings
+      DataKinds
+      TypeOperators
+      TypeFamilies
+      GADTs
+      FlexibleInstances
+      FlexibleContexts
+      MultiParamTypeClasses
+      StrictData
+      ScopedTypeVariables
+      DeriveGeneric
+      DeriveFunctor
   build-depends:
       aeson
     , base >=4.7 && <5
